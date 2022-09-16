@@ -14,10 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: true
+          submodules: false
           fetch-depth: 1
       - name: Build SoC configuration
         run: |
+          git submodule update --init
           cd design
           ls
           pwd
