@@ -19,6 +19,8 @@ jobs:
       - name: Build SoC configuration
         run: |
           cd design
+          ls
+          pwd
           make install install_mcw
           cp ../spi-patch.diff mgmt_core_wrapper/litex
           cd mgmt_core_wrapper/litex
