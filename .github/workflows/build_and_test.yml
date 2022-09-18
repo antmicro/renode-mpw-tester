@@ -58,8 +58,8 @@ jobs:
 
       - name: Verilate design
         run: |
-          apt -qqy update
-          apt -qqy install verilator
+          sudo apt -qqy update
+          sudo apt -qqy install verilator
           cd verilator
           cp $GITHUB_WORKSPACE/design/verilog/rtl/aes/generated/aes.v .
           git clone --depth=1 --branch 37446-mpw_testing https://github.com/renode/renode
