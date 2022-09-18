@@ -49,6 +49,27 @@ jobs:
           make verify-$TEST_NAME-elf
           cp $GITHUB_WORKSPACE/design/verilog/dv/$TEST_NAME/$TEST_NAME.elf $GITHUB_WORKSPACE/artifacts
 
+          # - name: Build design
+          #   run: |
+          #     wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -
+          #     add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/
+          #     apt -qqy update && apt -qqy install adoptopenjdk-8-hotspot
+          #     #somehow install sbt and build scala files, copy them to artifacts
+
+      - name: Verilate design
+        run: |
+          cd verilator
+          cp $GITHUB_WORKSPACE/design/verilog/rtl/aes/generated/aes.v .
+          git clone --depth=1 https://github.com/renode/renode
+          cd renode
+          git submodule update --init src/Infrastructure
+          cd ..
+          mkdir build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release -DUSER_RENODE_DIR="`pwd`/renode"  ..
+          make libVtop
+          cp libVtop.so $GITHUB_WORKSPACE/artifacts
+
       - uses: actions/upload-artifact@v3
         with:
           name: artifacts
