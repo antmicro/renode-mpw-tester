@@ -4,5 +4,7 @@ machine LoadPlatformDescription @design.repl
 showAnalyzer sysbus.uart
 showAnalyzer sysbus.uart Antmicro.Renode.Analyzers.LoggingUartAnalyzer
 
-sysbus LoadELF @test.elf
-user_space SimulationFilePath @/home/antmicro/Antmicro/renode-verilator-integration/samples/fossiAES/build/libVtop.so
+cpu EnableProfiler true $ORIGIN/../artifacts/execution-trace.speedscope true
+
+sysbus LoadELF $ORIGIN/../artifacts/test.elf
+user_space SimulationFilePath $ORIGIN/../artifacts/libVtop.so

@@ -5,4 +5,4 @@ hk: @ none
 
 user_space: Verilated.BaseDoubleWordVerilatedPeripheral @ sysbus <0x30000000, +0x1000>
     frequency: 100000000
-    useAbsoluteAddress: true
+    UseAbsoluteAddress: true
