@@ -46,7 +46,7 @@ jobs:
           export TEST_NAME=aes_test
           cd $GITHUB_WORKSPACE/design
           [ -f $GITHUB_WORKSPACE/patches/design.patch ] && git apply $GITHUB_WORKSPACE/patches/design.patch
-          make verify-$TEST_NAME-rtl
+          make verify-$TEST_NAME-elf
           cp $GITHUB_WORKSPACE/design/verilog/dv/$TEST_NAME/$TEST_NAME.elf $GITHUB_WORKSPACE/artifacts
 
       - uses: actions/upload-artifact@v3
