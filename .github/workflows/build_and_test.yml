@@ -60,13 +60,13 @@ jobs:
         run: |
           cd verilator
           cp $GITHUB_WORKSPACE/design/verilog/rtl/aes/generated/aes.v .
-          git clone --depth=1 https://github.com/renode/renode
+          git clone --depth=1 --branch 37446-mpw_testing https://github.com/renode/renode
           cd renode
           git submodule update --init src/Infrastructure
           cd ..
           mkdir build
           cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -DUSER_RENODE_DIR="`pwd`/renode"  ..
+          cmake -DCMAKE_BUILD_TYPE=Release -DUSER_RENODE_DIR="`pwd`/../renode"  ..
           make libVtop
           cp libVtop.so $GITHUB_WORKSPACE/artifacts
 
