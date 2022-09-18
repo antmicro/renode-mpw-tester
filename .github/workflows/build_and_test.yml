@@ -16,10 +16,11 @@ jobs:
         with:
           submodules: false
           fetch-depth: 1
+          # apparrently we can't fetch submodules with actions/checkout, because it always tries to go recursive (and we don't want that)
 
       - name: Prepare the repository
           mkdir -p $GITHUB_WORKSPACE/artifacts
-          git submodule update --init # apparrently we can't fetch submodules with actions/checkout, because it always tries to go recursive (and we don't want that)
+          git submodule update --init
           cd $GITHUB_WORKSPACE/design
           make install install_mcw
           git apply $GITHUB_WORKSPACE/patches/Makefile.patch
