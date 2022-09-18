@@ -47,7 +47,7 @@ jobs:
           cd $GITHUB_WORKSPACE/design
           [ -f $GITHUB_WORKSPACE/patches/design.patch ] && git apply $GITHUB_WORKSPACE/patches/design.patch
           make verify-$TEST_NAME-elf
-          cp $GITHUB_WORKSPACE/design/verilog/dv/$TEST_NAME/$TEST_NAME.elf $GITHUB_WORKSPACE/artifacts
+          cp $GITHUB_WORKSPACE/design/verilog/dv/$TEST_NAME/$TEST_NAME.elf $GITHUB_WORKSPACE/artifacts/test.elf
 
           # - name: Build design
           #   run: |
@@ -71,6 +71,13 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE=Release -DUSER_RENODE_DIR="`pwd`/../renode"  ..
           make libVtop
           cp libVtop.so $GITHUB_WORKSPACE/artifacts
+
+      - name: Run test
+        uses: antmicro/renode-test-action@v2.0.0
+        with:
+          renode-version: '1.13.1+20220918git57f09419'
+          tests-to-run: 'scripts/*.robot'
+          artifacts-path: $GITHUB_WORKSPACE/artifacts
 
       - uses: actions/upload-artifact@v3
         with:
