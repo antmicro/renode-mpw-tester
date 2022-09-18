@@ -1,0 +1,68 @@
+diff --git a/Makefile b/Makefile
+index b1ade97..8b45275 100644
+--- a/Makefile
++++ b/Makefile
+@@ -70,13 +70,27 @@ $(blocks): % :
+ 	export CARAVEL_ROOT=$(CARAVEL_ROOT) && cd openlane && $(MAKE) $*
+ 
+ dv_patterns=$(shell cd verilog/dv && find * -maxdepth 0 -type d)
++dv-targets-elf=$(dv_patterns:%=verify-%-elf)
+ dv-targets-rtl=$(dv_patterns:%=verify-%-rtl)
+ dv-targets-gl=$(dv_patterns:%=verify-%-gl)
+ dv-targets-gl-sdf=$(dv_patterns:%=verify-%-gl-sdf)
+ 
+ TARGET_PATH=$(shell pwd)
++build_command="cd ${TARGET_PATH}/verilog/dv/$* && export SIM=${SIM} && make $*.elf"
+ verify_command="cd ${TARGET_PATH}/verilog/dv/$* && export SIM=${SIM} && make"
+ dv_base_dependencies=simenv
++docker_run_build=\
++	docker run -v ${TARGET_PATH}:${TARGET_PATH} -v ${PDK_ROOT}:${PDK_ROOT} \
++		-v ${CARAVEL_ROOT}:${CARAVEL_ROOT} \
++		-e TARGET_PATH=${TARGET_PATH} -e PDK_ROOT=${PDK_ROOT} \
++		-e CARAVEL_ROOT=${CARAVEL_ROOT} \
++		-e TOOLS=/opt/riscv32i \
++		-e DESIGNS=$(TARGET_PATH) \
++		-e CORE_VERILOG_PATH=$(TARGET_PATH)/mgmt_core_wrapper/verilog \
++		-e GCC_PREFIX=riscv32-unknown-elf \
++		-e MCW_ROOT=$(MCW_ROOT) \
++		-u $$(id -u $$USER):$$(id -g $$USER) efabless/dv_setup:latest \
++		sh -c $(build_command)
+ docker_run_verify=\
+ 	docker run -v ${TARGET_PATH}:${TARGET_PATH} -v ${PDK_ROOT}:${PDK_ROOT} \
+ 		-v ${CARAVEL_ROOT}:${CARAVEL_ROOT} \
+@@ -105,6 +119,10 @@ verify-all-gl: $(dv-targets-gl)
+ .PHONY: verify-all-gl-sdf
+ verify-all-gl-sdf: $(dv-targets-gl-sdf)
+ 
++$(dv-targets-rtl): SIM=ELF
++$(dv-targets-elf): verify-%-elf: $(dv_base_dependencies)
++	$(docker_run_build)
++
+ $(dv-targets-rtl): SIM=RTL
+ $(dv-targets-rtl): verify-%-rtl: $(dv_base_dependencies)
+ 	$(docker_run_verify)
+@@ -180,6 +198,24 @@ run-precheck: check-pdk check-precheck
+ 	-u $(shell id -u $(USER)):$(shell id -g $(USER)) efabless/mpw_precheck:latest bash -c "cd $(PRECHECK_ROOT) ; python3 mpw_precheck.py --input_directory $(INPUT_DIRECTORY) --pdk_root $(PDK_ROOT)"
+ 
+ 
++# Generate csr.json
++ROOT_PATCH_FILEPATH = $(PWD)/patch.diff
++MCW_PATCH_FILEPATH = $(MCW_ROOT)/litex/patch.diff
++CSR_JSON = $(MCW_ROOT)/litex/csr.json
++
++.PHONY: mgmt_soc/csr_json
++mgmt_soc: $(CSR_JSON)
++	echo "Done. Generated file can be found in $(CSR_JSON)."
++
++$(CSR_JSON): $(MCW_PATCH_FILEPATH)
++	cd $(MCW_ROOT)/litex && \
++	$(MAKE) mgmt_soc
++
++$(MCW_PATCH_FILEPATH):
++	cp $(ROOT_PATCH_FILEPATH) $(MCW_ROOT)/litex && \
++	cd $(MCW_ROOT)/litex && \
++	git apply $(MCW_PATCH_FILEPATH) && \
++	pip install -r requirements.txt
+ 
+ .PHONY: clean
+ clean:

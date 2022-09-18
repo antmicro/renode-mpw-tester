@@ -16,16 +16,37 @@ jobs:
         with:
           submodules: false
           fetch-depth: 1
+
+      - name: Prepare the repository
+          mkdir -p $GITHUB_WORKSPACE/artifacts
+          git submodule update --init # apparrently we can't fetch submodules with actions/checkout, because it always tries to go recursive (and we don't want that)
+          cd $GITHUB_WORKSPACE/design
+          make install install_mcw
+          git apply $GITHUB_WORKSPACE/patches/Makefile.patch
+          cd $GITHUB_WORKSPACE/design/mgmt_core_wrapper/litex
+          git apply $GITHUB_WORKSPACE/patches/caravel.py.patch
+
       - name: Build SoC configuration
         run: |
-          git submodule update --init
-          cd design
-          ls
-          pwd
-          make install install_mcw
-          cp ../spi-patch.diff mgmt_core_wrapper/litex
-          cd mgmt_core_wrapper/litex
-          git apply spi-patch.diff
+          cd $GITHUB_WORKSPACE/design/mgmt_core_wrapper/litex
           pip install -r requirements.txt
           make mgmt_soc
-          
+          cp crs.json $GITHUB_WORKSPACE/artifacts
+
+      - name: Build Renode configuration
+        run: |
+          python3 scripts/litex_json2renode.py --auto-align dff --auto-align sram --repl design.repl $GITHUB_WORKSPACE/artifacts/csr.json
+          cat design.repl scripts/design-addend.repl > $GITHUB_WORKSPACE/artifacts/design.repl
+          cp scripts/design.resc $GITHUB_WORKSPACE/artifacts
+
+      - name: Build test
+        run: |
+          export TEST_NAME=aes_test
+          cd $GITHUB_WORKSPACE/design
+          make verify-$TEST_NAME-rtl
+          cp $GITHUB_WORKSPACE/design/verilog/dv/$TEST_NAME/$TEST_NAME.elf $GITHUB_WORKSPACE/artifacts
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: artifacts
+          path: artifacts
