@@ -19,6 +19,7 @@ jobs:
           # apparrently we can't fetch submodules with actions/checkout, because it always tries to go recursive (and we don't want that)
 
       - name: Prepare the repository
+        run: |
           mkdir -p $GITHUB_WORKSPACE/artifacts
           git submodule update --init
           cd $GITHUB_WORKSPACE/design
