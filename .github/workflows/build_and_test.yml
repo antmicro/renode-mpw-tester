@@ -33,7 +33,7 @@ jobs:
           cd $GITHUB_WORKSPACE/design/mgmt_core_wrapper/litex
           pip install -r requirements.txt
           make mgmt_soc
-          cp crs.json $GITHUB_WORKSPACE/artifacts
+          cp csr.json $GITHUB_WORKSPACE/artifacts
 
       - name: Build Renode configuration
         run: |
