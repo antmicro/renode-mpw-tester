@@ -1,8 +1,8 @@
 using sysbus
 mach create
 machine LoadPlatformDescription $ORIGIN/../artifacts/design.repl
-showAnalyzer sysbus.uart
-showAnalyzer sysbus.uart Antmicro.Renode.Analyzers.LoggingUartAnalyzer
+showAnalyzer uart
+showAnalyzer uart Antmicro.Renode.Analyzers.LoggingUartAnalyzer
 
 cpu EnableProfiler true $ORIGIN/../artifacts/execution-trace.speedscope true
 
