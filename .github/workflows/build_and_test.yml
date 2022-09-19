@@ -9,7 +9,7 @@ on:
 
 env:
   TEST_NAME: aes_test
-  DESIGN_NAME: aes.v
+  DESIGN_NAME: aes
 
 jobs:
   build:
