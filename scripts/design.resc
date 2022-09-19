@@ -1,6 +1,6 @@
 using sysbus
 mach create
-machine LoadPlatformDescription @design.repl
+machine LoadPlatformDescription $ORIGIN/design.repl
 showAnalyzer sysbus.uart
 showAnalyzer sysbus.uart Antmicro.Renode.Analyzers.LoggingUartAnalyzer
 
