@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 
 # Name of the project
-project(fossiAES)
+project(MPW-test)
 
 # Verilog file containing the top module to be Verilated
 set(VTOP aes.v)

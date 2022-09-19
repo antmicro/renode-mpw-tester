@@ -7,6 +7,10 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+env:
+  TEST_NAME: aes_test
+  DESIGN_NAME: aes.v
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -43,7 +47,6 @@ jobs:
 
       - name: Build test
         run: |
-          export TEST_NAME=aes_test
           cd $GITHUB_WORKSPACE/design
           [ -f $GITHUB_WORKSPACE/patches/design.patch ] && git apply $GITHUB_WORKSPACE/patches/design.patch
           make verify-$TEST_NAME-elf
@@ -61,7 +64,7 @@ jobs:
           sudo apt -qqy update
           sudo apt -qqy install verilator
           cd verilator
-          cp $GITHUB_WORKSPACE/design/verilog/rtl/aes/generated/aes.v .
+          cp $GITHUB_WORKSPACE/design/verilog/rtl/$DESIGN_NAME/generated/$DESIGN_NAME.v .
           git clone --depth=1 --branch 37446-mpw_testing https://github.com/renode/renode
           cd renode
           git submodule update --init src/Infrastructure

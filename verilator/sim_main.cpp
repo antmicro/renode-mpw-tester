@@ -22,7 +22,7 @@
 #include "src/buses/wishbone.h"
 #include "src/renode_bus.h"
 
-RenodeAgent *aes;
+RenodeAgent *agent;
 Vaes *top = new Vaes;
 #if VM_TRACE
 VERILATED_DUMP *tfp;
@@ -63,7 +63,7 @@ RenodeAgent *Init() {
     //=================================================
     // Init peripheral
     //=================================================
-    aes = new RenodeAgent(bus);
+    agent = new RenodeAgent(bus);
 
 #if VM_TRACE
     Verilated::traceEverOn(true);
@@ -72,5 +72,5 @@ RenodeAgent *Init() {
     tfp->open(DEF_TRACE_FILEPATH);
 #endif
 
-    return aes;
+    return agent;
 }
