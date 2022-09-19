@@ -44,6 +44,7 @@ jobs:
           python3 scripts/litex_json2renode.py --auto-align dff --auto-align sram --repl design.repl $GITHUB_WORKSPACE/artifacts/csr.json
           cat design.repl scripts/design-addend.repl > $GITHUB_WORKSPACE/artifacts/design.repl
           cp scripts/design.resc $GITHUB_WORKSPACE/artifacts
+          cp scripts/design.robot $GITHUB_WORKSPACE/artifacts
 
       - name: Build test
         run: |
@@ -76,10 +77,10 @@ jobs:
           cp libVtop.so $GITHUB_WORKSPACE/artifacts
 
       - name: Run test
-        uses: antmicro/renode-test-action@v2.0.0
+        uses: antmicro/renode-test-action@v3.0.0
         with:
           renode-version: '1.13.1+20220918git57f09419'
-          tests-to-run: 'scripts/*.robot'
+          tests-to-run: 'artifacts/*.robot'
           artifacts-path: $GITHUB_WORKSPACE/artifacts
 
       - uses: actions/upload-artifact@v3
