@@ -10,7 +10,7 @@ ${VALUE}                      0xAB610000
 
 *** Keywords ***
 Create Machine
-    Execute Command           i $ORIGIN/design.resc
+    Execute Command           i ${CURDIR}/design.resc
 
 
 *** Test Cases ***
