@@ -72,13 +72,8 @@ run_test()
 }
 
 
-echo 1
 build_soc_configuration
-echo 2
 build_renode_configuration
-echo 3
 build_test
-echo 4
 verilate_design
-echo 5
 # run_test
