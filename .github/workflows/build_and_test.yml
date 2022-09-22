@@ -27,10 +27,12 @@ jobs:
           sudo apt -qqy install verilator
 
       - name: Build
-        run: ./build.sh
+        run: |
+          ./build.sh
 
       - name: Run test
-        run: ./test.sh
+        run: |
+          ./test.sh
           
 
       - uses: actions/upload-artifact@v3
