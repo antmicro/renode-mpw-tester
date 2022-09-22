@@ -9,6 +9,8 @@ DESIGN_NAME=${DESIGN_NAME:-${DESIGN_NAME_DEFAULT}}
 TEST_NAME_DEFAULT=aes_test
 TEST_NAME=${TEST_NAME:-${TEST_NAME_DEFAULT}}
 
+DESIGN_FILES=""
+
 usage()
 {
     echo "$0 [-v DESIGN_NAME ] [-t TEST_NAME] [-T]"
@@ -52,7 +54,9 @@ verilate_design()
     BUILD_DIR=${BUILD_DIR:-build}
 
     cd "$GITHUB_WORKSPACE/$VERILATOR_DIR"
-    cp "$GITHUB_WORKSPACE"/design/verilog/rtl/"$DESIGN_NAME"/generated/"$DESIGN_NAME".v .
+    [ -n "$DESIGN_NAME" ] \
+    && cp "$GITHUB_WORKSPACE"/design/verilog/rtl/"$DESIGN_NAME"/generated/"$DESIGN_NAME".v . \
+    || cp -t . $DESIGN_FILES
     
     # clone renode
     [ -e "$GITHUB_WORKSPACE/$VERILATOR_DIR/$RENODE_CLONE_DIR" ] \
@@ -71,7 +75,7 @@ verilate_design()
     || mkdir "$GITHUB_WORKSPACE/$VERILATOR_DIR/$BUILD_DIR"
 
     cd "$GITHUB_WORKSPACE/$VERILATOR_DIR/$BUILD_DIR"
-    cmake -DVTOP="${DESIGN_NAME}".v -DCMAKE_BUILD_TYPE=Release -DUSER_RENODE_DIR="$GITHUB_WORKSPACE/$VERILATOR_DIR/$RENODE_CLONE_DIR"  ..
+    cmake -DVTOP="${DESIGN_FILES}" -DCMAKE_BUILD_TYPE=Release -DUSER_RENODE_DIR="$GITHUB_WORKSPACE/$VERILATOR_DIR/$RENODE_CLONE_DIR"  ..
     make libVtop
     cp libVtop.so "$GITHUB_WORKSPACE"/artifacts
     cd "$GITHUB_WORKSPACE"
@@ -81,9 +85,12 @@ verilate_design()
 
 
 
-while getopts "v:t:TV" option; do
+while getopts "v:t:TVf:" option; do
     case "$option" in
-        v) DESIGN_NAME="$OPTARG" ;;
+        v)
+            DESIGN_NAME="$OPTARG"
+            DESIGN_FILES="$DESIGN_NAME.v"
+            ;;
         t) TEST_NAME="$OPTARG" ;;
         V) 
             find design/verilog/rtl/* -maxdepth 0 -type d \
@@ -97,6 +104,7 @@ while getopts "v:t:TV" option; do
 
             exit
             ;;
+        f) DESIGN_FILES="$DESIGN_FILES $OPTARG" ;;
         *)
             usage
             exit 1
