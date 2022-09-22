@@ -2,9 +2,22 @@
 
 set -e
 
-TEST_NAME=${TEST_NAME:-aes_test}
-DESIGN_NAME=${DESIGN_NAME:-aes}
 GITHUB_WORKSPACE=${GITHUB_WORKSPACE:-$(pwd)}
+
+DESIGN_NAME_DEFAULT=aes
+DESIGN_NAME=${DESIGN_NAME:-${DESIGN_NAME_DEFAULT}}
+TEST_NAME_DEFAULT=aes_test
+TEST_NAME=${TEST_NAME:-${TEST_NAME_DEFAULT}}
+
+usage()
+{
+    echo "$0 [-v DESIGN_NAME ] [-t TEST_NAME] [-T]"
+    echo ""
+    echo " -v DESIGN_NAME - Set design to use, default is $DESIGN_NAME_DEFAULT"
+    echo " -t TEST_NAME - Set test name to use, default is $TEST_NAME_DEFAULT"
+    echo " -V - Display all possible design names"
+    echo " -T - Display all possible test names"
+}
 
 build_soc_configuration()
 {
@@ -32,12 +45,14 @@ build_test()
 
 verilate_design()
 {
+    echo "DESIGN NAME:     $DESIGN_NAME"
+
     VERILATOR_DIR=${VERILATOR_DIR:-verilator}
     RENODE_CLONE_DIR=${RENODE_CLONE_DIR:-renode}
     BUILD_DIR=${BUILD_DIR:-build}
 
     cd "$GITHUB_WORKSPACE/$VERILATOR_DIR"
-    cp $GITHUB_WORKSPACE/design/verilog/rtl/$DESIGN_NAME/generated/$DESIGN_NAME.v .
+    cp "$GITHUB_WORKSPACE"/design/verilog/rtl/"$DESIGN_NAME"/generated/"$DESIGN_NAME".v .
     
     # clone renode
     [ -e "$GITHUB_WORKSPACE/$VERILATOR_DIR/$RENODE_CLONE_DIR" ] \
@@ -56,21 +71,38 @@ verilate_design()
     || mkdir "$GITHUB_WORKSPACE/$VERILATOR_DIR/$BUILD_DIR"
 
     cd "$GITHUB_WORKSPACE/$VERILATOR_DIR/$BUILD_DIR"
-    cmake -DCMAKE_BUILD_TYPE=Release -DUSER_RENODE_DIR="$GITHUB_WORKSPACE/$VERILATOR_DIR/$RENODE_CLONE_DIR"  ..
+    cmake -DVTOP="${DESIGN_NAME}".v -DCMAKE_BUILD_TYPE=Release -DUSER_RENODE_DIR="$GITHUB_WORKSPACE/$VERILATOR_DIR/$RENODE_CLONE_DIR"  ..
     make libVtop
     cp libVtop.so "$GITHUB_WORKSPACE"/artifacts
     cd "$GITHUB_WORKSPACE"
+
+    echo END
 }
 
-run_test()
-{
-    echo run test
-    # with:
-      # renode-version: '1.13.1+20220918git57f09419'
-      # tests-to-run: 'artifacts/*.robot'
-      # artifacts-path: $GITHUB_WORKSPACE/artifacts
-}
 
+
+while getopts "v:t:TV" option; do
+    case "$option" in
+        v) DESIGN_NAME="$OPTARG" ;;
+        t) TEST_NAME="$OPTARG" ;;
+        V) 
+            find design/verilog/rtl/* -maxdepth 0 -type d \
+            | sed 's|design/verilog/rtl/||; /example/d'
+
+            exit
+            ;;
+        T) 
+            find design/verilog/dv/* -maxdepth 0 -type d \
+            | sed 's|design/verilog/dv/||'
+
+            exit
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+    esac
+done
 
 build_soc_configuration
 build_renode_configuration
