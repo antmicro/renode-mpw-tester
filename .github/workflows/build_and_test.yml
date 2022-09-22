@@ -21,7 +21,7 @@ jobs:
           # apparrently we can't fetch submodules with actions/checkout, because it always tries to go recursive (and we don't want that)
 
       - name: Prepare dependencies
-      - run: |
+        run: |
           pip install -r requirements.txt  
           sudo apt -qqy update
           sudo apt -qqy install verilator
