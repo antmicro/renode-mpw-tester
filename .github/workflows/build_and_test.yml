@@ -22,7 +22,7 @@ jobs:
 
       - name: Prepare dependencies
         run: |
-          pip install -r requirements.txt  
+          pip install -r "$GITHUB_WORKSPACE"/design/mgmt_core_wrapper/litex/requirements.txt
           sudo apt -qqy update
           sudo apt -qqy install verilator
 
