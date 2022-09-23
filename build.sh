@@ -40,6 +40,7 @@ usage()
 build_soc_configuration()
 {
       cd "$GITHUB_WORKSPACE"/design/mgmt_core_wrapper/litex
+      pip install -r requirements.txt
       make mgmt_soc
       cp csr.json "$GITHUB_WORKSPACE"/artifacts
       cd "$GITHUB_WORKSPACE"
