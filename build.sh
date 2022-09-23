@@ -13,12 +13,18 @@ DESIGN_FILES=""
 
 usage()
 {
-    echo "$0 [-v DESIGN_NAME ] [-t TEST_NAME] [-T]"
+    echo "$0 [-v DESIGN_NAME ] [-t TEST_NAME] [-T] [MODE]"
     echo ""
     echo " -v DESIGN_NAME - Set design to use, default is $DESIGN_NAME_DEFAULT"
     echo " -t TEST_NAME - Set test name to use, default is $TEST_NAME_DEFAULT"
     echo " -V - Display all possible design names"
     echo " -T - Display all possible test names"
+    echo " MODE - Function to run, default is ALL"
+    echo "      soc_configuration - Build soc configuration"
+    echo "      renode_configuration - Build renode configuration"
+    echo "      test - Build test"
+    echo "      verilate_design - Verilate design"
+    echo "      ALL - Run all functions above"
 }
 
 build_soc_configuration()
@@ -84,36 +90,51 @@ verilate_design()
 }
 
 
-
-while getopts "v:t:TVf:" option; do
-    case "$option" in
-        v)
-            DESIGN_NAME="$OPTARG"
+set -- $(getopt "v:t:TVf:" "$@") || usage ""
+while :; do
+    case "$1" in
+        -v)
+            shift; DESIGN_NAME="$1"
             DESIGN_FILES="$DESIGN_NAME.v"
             ;;
-        t) TEST_NAME="$OPTARG" ;;
-        V) 
+        -t) shift; TEST_NAME="$1" ;;
+        -V) 
             find design/verilog/rtl/* -maxdepth 0 -type d \
             | sed 's|design/verilog/rtl/||; /example/d'
 
             exit
             ;;
-        T) 
+        -T) 
             find design/verilog/dv/* -maxdepth 0 -type d \
             | sed 's|design/verilog/dv/||'
 
             exit
             ;;
-        f) DESIGN_FILES="$DESIGN_FILES $OPTARG" ;;
+        -f) shift; DESIGN_FILES="$DESIGN_FILES $1" ;;
+        --) break;;
         *)
             usage
             exit 1
             ;;
     esac
+    shift
 done
+shift
 
-build_soc_configuration
-build_renode_configuration
-build_test
-verilate_design
+echo "$DESIGN_NAME, $DESIGN_FILES, $TEST_NAME"
+
+case "${1:-ALL}" in
+    soc_configuration) build_soc_configuration ;;
+    renode_configuration) build_renode_configuration ;;
+    test) build_test ;;
+    verilate_design) verilate_design ;;
+    ALL)
+        build_soc_configuration
+        build_renode_configuration
+        build_test
+        verilate_design
+    ;;
+    *) usage ;;
+esac
+
 # run_test

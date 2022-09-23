@@ -19,17 +19,31 @@ jobs:
           submodules: false
           fetch-depth: 1
           # apparrently we can't fetch submodules with actions/checkout, because it always tries to go recursive (and we don't want that)
+      - name: Prepare the repository
+        run: |
+          ./prepare.sh
 
       - name: Prepare dependencies
         run: |
-          ./prepare.sh
           pip install -r /"$GITHUB_WORKSPACE"/design/mgmt_core_wrapper/litex/requirements.txt
           sudo apt -qqy update
           sudo apt -qqy install verilator
 
-      - name: Build
+      - name: Build SoC configuration
         run: |
-          ./build.sh
+          ./build.sh soc_configuration
+
+      - name: Build Renode configuration
+        run: |
+          ./build.sh renode_configuration
+
+      - name: Build test
+        run: |
+          ./build.sh test
+
+      - name: Verilate design
+        run: |
+          ./build.sh verilate_design
 
       - name: Run test
         uses: antmicro/renode-test-action@v3.0.0
