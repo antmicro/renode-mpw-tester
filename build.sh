@@ -3,28 +3,38 @@
 set -e
 
 GITHUB_WORKSPACE=${GITHUB_WORKSPACE:-$(pwd)}
+VERILATOR_DIR=${VERILATOR_DIR:-verilator}
+RENODE_CLONE_DIR=${RENODE_CLONE_DIR:-renode}
+BUILD_DIR=${BUILD_DIR:-build}
 
 DESIGN_NAME_DEFAULT=aes
 DESIGN_NAME=${DESIGN_NAME:-${DESIGN_NAME_DEFAULT}}
+DESIGN_FILES="$DESIGN_NAME.v"
 TEST_NAME_DEFAULT=aes_test
 TEST_NAME=${TEST_NAME:-${TEST_NAME_DEFAULT}}
-
-DESIGN_FILES=""
+CLASS_NAME_DEFAULT=Vaes
+CLASS_NAME=${CLASS_NAME:-${CLASS_NAME_DEFAULT}}
+INCLUDE_DEFAULT=Vaes.h
+INCLUDE=${INCLUDE:-${INCLUDE_DEFAULT}}
 
 usage()
 {
-    echo "$0 [-v DESIGN_NAME ] [-t TEST_NAME] [-T] [MODE]"
+    echo "$0 [-v DESIGN_NAME ] [-t TEST_NAME] [-i FILE] [-I INCLUDE] [-c CLASS] [-TV] [MODE]"
     echo ""
-    echo " -v DESIGN_NAME - Set design to use, default is $DESIGN_NAME_DEFAULT"
-    echo " -t TEST_NAME - Set test name to use, default is $TEST_NAME_DEFAULT"
-    echo " -V - Display all possible design names"
-    echo " -T - Display all possible test names"
-    echo " MODE - Function to run, default is ALL"
-    echo "      soc_configuration - Build soc configuration"
-    echo "      renode_configuration - Build renode configuration"
-    echo "      test - Build test"
-    echo "      verilate_design - Verilate design"
-    echo "      ALL - Run all functions above"
+    echo " -v DESIGN_NAME   - Set design to use, default is $DESIGN_NAME_DEFAULT"
+    echo " -t TEST_NAME     - Set test name to use, default is $TEST_NAME_DEFAULT"
+    echo " -f FILE          - Set specific verilator file to use"
+    echo " -i FILE          - Copy additional file to $VERILATOR_DIR"
+    echo " -I INCLUDE       - Set include in sim_main.cpp, default is $INCLUDE_DEFAULT"
+    echo " -C CLASS         - Set top class in sim_main.cpp, default is $CLASS_NAME_DEFAULT"
+    echo " -V               - Display all possible design names"
+    echo " -T               - Display all possible test names"
+    echo " MODE             - Function to run, default is ALL"
+    echo "      soc_configuration       - Build soc configuration"
+    echo "      renode_configuration    - Build renode configuration"
+    echo "      test                    - Build test"
+    echo "      verilate_design         - Verilate design"
+    echo "      ALL                     - Run all functions above"
 }
 
 build_soc_configuration()
@@ -55,14 +65,10 @@ verilate_design()
 {
     echo "DESIGN NAME:     $DESIGN_NAME"
 
-    VERILATOR_DIR=${VERILATOR_DIR:-verilator}
-    RENODE_CLONE_DIR=${RENODE_CLONE_DIR:-renode}
-    BUILD_DIR=${BUILD_DIR:-build}
 
     cd "$GITHUB_WORKSPACE/$VERILATOR_DIR"
     [ -n "$DESIGN_NAME" ] \
-    && cp "$GITHUB_WORKSPACE"/design/verilog/rtl/"$DESIGN_NAME"/generated/"$DESIGN_NAME".v . \
-    || cp -t . $DESIGN_FILES
+    && cp "$GITHUB_WORKSPACE"/design/verilog/rtl/"$DESIGN_NAME"/generated/"$DESIGN_NAME".v .
     
     # clone renode
     [ -e "$GITHUB_WORKSPACE/$VERILATOR_DIR/$RENODE_CLONE_DIR" ] \
@@ -80,6 +86,8 @@ verilate_design()
     [ -e "$GITHUB_WORKSPACE/$VERILATOR_DIR/$BUILD_DIR" ] \
     || mkdir "$GITHUB_WORKSPACE/$VERILATOR_DIR/$BUILD_DIR"
 
+    sed "s/\$BUILD_INCLUDE/$INCLUDE/;s/\$BUILD_CLASS/$CLASS_NAME/g" "$GITHUB_WORKSPACE"/sim_main.cpp.template > "$GITHUB_WORKSPACE/$VERILATOR_DIR"/sim_main.cpp
+
     cd "$GITHUB_WORKSPACE/$VERILATOR_DIR/$BUILD_DIR"
     cmake -DVTOP="${DESIGN_FILES}" -DCMAKE_BUILD_TYPE=Release -DUSER_RENODE_DIR="$GITHUB_WORKSPACE/$VERILATOR_DIR/$RENODE_CLONE_DIR"  ..
     make libVtop
@@ -90,7 +98,7 @@ verilate_design()
 }
 
 
-set -- $(getopt "v:t:TVf:" "$@") || usage ""
+set -- $(getopt "v:t:TVf:i:c:I:" "$@") || usage ""
 while :; do
     case "$1" in
         -v)
@@ -98,6 +106,8 @@ while :; do
             DESIGN_FILES="$DESIGN_NAME.v"
             ;;
         -t) shift; TEST_NAME="$1" ;;
+        -c) shift; CLASS_NAME="$1" ;;
+        -I) shift; INCLUDE="$1" ;;
         -V) 
             find design/verilog/rtl/* -maxdepth 0 -type d \
             | sed 's|design/verilog/rtl/||; /example/d'
@@ -110,7 +120,27 @@ while :; do
 
             exit
             ;;
-        -f) shift; DESIGN_FILES="$DESIGN_FILES $1" ;;
+        -f) 
+            shift; 
+            base_path="$(dirname "$1")"
+            file_name="$(basename "$1")"
+            cd "$base_path"
+            absolute_path="$(pwd)/$file_name"
+            cd "$OLDPWD"
+            echo $absolute_path
+            DESIGN_FILES="$absolute_path"
+            cp $absolute_path $GITHUB_WORKSPACE/$VERILATOR_DIR
+            ;;
+        -i) 
+            shift; 
+            base_path="$(dirname "$1")"
+            file_name="$(basename "$1")"
+            cd "$base_path"
+            absolute_path="$(pwd)/$file_name"
+            cd "$OLDPWD"
+            echo $absolute_path
+            cp $absolute_path $GITHUB_WORKSPACE/$VERILATOR_DIR
+            ;;
         --) break;;
         *)
             usage
@@ -120,8 +150,6 @@ while :; do
     shift
 done
 shift
-
-echo "$DESIGN_NAME, $DESIGN_FILES, $TEST_NAME"
 
 case "${1:-ALL}" in
     soc_configuration) build_soc_configuration ;;
