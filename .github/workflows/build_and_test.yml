@@ -19,60 +19,31 @@ jobs:
           submodules: false
           fetch-depth: 1
           # apparrently we can't fetch submodules with actions/checkout, because it always tries to go recursive (and we don't want that)
-
       - name: Prepare the repository
         run: |
-          mkdir -p $GITHUB_WORKSPACE/artifacts
-          git submodule update --init
-          cd $GITHUB_WORKSPACE/design
-          make install install_mcw
-          git apply $GITHUB_WORKSPACE/patches/Makefile.patch
-          cd $GITHUB_WORKSPACE/design/mgmt_core_wrapper/litex
-          git apply $GITHUB_WORKSPACE/patches/caravel.py.patch
+          ./prepare.sh
+
+      - name: Prepare dependencies
+        run: |
+          pip install -r "$GITHUB_WORKSPACE"/design/mgmt_core_wrapper/litex/requirements.txt
+          sudo apt -qqy update
+          sudo apt -qqy install verilator
 
       - name: Build SoC configuration
         run: |
-          cd $GITHUB_WORKSPACE/design/mgmt_core_wrapper/litex
-          pip install -r requirements.txt
-          make mgmt_soc
-          cp csr.json $GITHUB_WORKSPACE/artifacts
+          ./build.sh soc_configuration
 
       - name: Build Renode configuration
         run: |
-          python3 scripts/litex_json2renode.py --auto-align dff --auto-align sram --repl design.repl $GITHUB_WORKSPACE/artifacts/csr.json
-          cat design.repl scripts/design-addend.repl > $GITHUB_WORKSPACE/artifacts/design.repl
-          cp scripts/design.resc $GITHUB_WORKSPACE/artifacts
-          cp scripts/design.robot $GITHUB_WORKSPACE/artifacts
+          ./build.sh renode_configuration
 
       - name: Build test
         run: |
-          cd $GITHUB_WORKSPACE/design
-          [ -f $GITHUB_WORKSPACE/patches/design.patch ] && git apply $GITHUB_WORKSPACE/patches/design.patch
-          make verify-$TEST_NAME-elf
-          cp $GITHUB_WORKSPACE/design/verilog/dv/$TEST_NAME/$TEST_NAME.elf $GITHUB_WORKSPACE/artifacts/test.elf
-
-          # - name: Build design
-          #   run: |
-          #     wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | apt-key add -
-          #     add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/
-          #     apt -qqy update && apt -qqy install adoptopenjdk-8-hotspot
-          #     #somehow install sbt and build scala files, copy them to artifacts
+          ./build.sh test
 
       - name: Verilate design
         run: |
-          sudo apt -qqy update
-          sudo apt -qqy install verilator
-          cd verilator
-          cp $GITHUB_WORKSPACE/design/verilog/rtl/$DESIGN_NAME/generated/$DESIGN_NAME.v .
-          git clone --depth=1 --branch 37446-mpw_testing https://github.com/renode/renode
-          cd renode
-          git submodule update --init src/Infrastructure
-          cd ..
-          mkdir build
-          cd build
-          cmake -DCMAKE_BUILD_TYPE=Release -DUSER_RENODE_DIR="`pwd`/../renode"  ..
-          make libVtop
-          cp libVtop.so $GITHUB_WORKSPACE/artifacts
+          ./build.sh verilate_design
 
       - name: Run test
         uses: antmicro/renode-test-action@v3.0.0
