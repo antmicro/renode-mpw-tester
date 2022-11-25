@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.8)
 project(MPW-test)
 
 # Verilog file containing the top module to be Verilated
-set(VTOP aes.v)
+option(VTOP ".v to use" aes.v)
 
 # C/C++ source files to be compiled
 set(CSOURCES sim_main.cpp)
