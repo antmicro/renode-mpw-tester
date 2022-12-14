@@ -38,6 +38,7 @@ To use a custom design, set TEST_NAME, DESIGN_NAME, VTOP, CLASS and INCLUDE para
  -C CLASS         - Set top class in sim_main.cpp, default is Vaes
  -V               - Display all possible design names
  -T               - Display all possible test names
+ -p               - Set PDK root directory, default is /usr/local/share/pdk
  MODE             - Function to run, default is ALL
       soc_configuration       - Build soc configuration
       renode_configuration    - Build renode configuration

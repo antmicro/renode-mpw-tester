@@ -2,10 +2,14 @@
 
 set -e
 
-BASE_DIR=${GITHUB_WORKSPACE:-$(pwd)}
+export BASE_DIR=${BASE_DIR:-${GITGUB_WORKSPACE}}
+export BASE_DIR=${BASE_DIR:-$(pwd)}
+PDK_ROOT_DEFAULT=/usr/local/share/pdk
+export PDK_ROOT=${PDK_ROOT:-${PDK_ROOT_DEFAULT}}
 VERILATOR_DIR=${VERILATOR_DIR:-verilator}
 RENODE_CLONE_DIR=${RENODE_CLONE_DIR:-renode}
 BUILD_DIR=${BUILD_DIR:-build}
+
 
 DESIGN_NAME_DEFAULT=aes
 DESIGN_NAME=${DESIGN_NAME:-${DESIGN_NAME_DEFAULT}}
@@ -46,6 +50,7 @@ usage()
     echo " -C CLASS         - Set top class in sim_main.cpp, default is $CLASS_NAME_DEFAULT"
     echo " -V               - Display all possible design names"
     echo " -T               - Display all possible test names"
+    echo " -p               - Set PDK root directory, default is $PDK_ROOT_DEFAULT"
     echo " MODE             - Function to run, default is ALL"
     echo "      soc_configuration       - Build soc configuration"
     echo "      renode_configuration    - Build renode configuration"
@@ -118,7 +123,7 @@ verilate_design()
     popd >/dev/null
 }
 
-set -- $(getopt "v:t:TVf:i:c:I:" "$@") || usage ""
+set -- $(getopt "v:t:TVf:i:c:I:p:" "$@") || usage ""
 while :; do
     case "$1" in
         -v)
@@ -151,6 +156,8 @@ while :; do
             absolute_path="$(realpath "$1")"
             cp $absolute_path $BASE_DIR/$VERILATOR_DIR
             ;;
+        -p)
+            shift; PDK_ROOT="$1" ;;
         --) break;;
         *)
             usage
