@@ -99,7 +99,6 @@ verify-all-gl-sdf: $(dv-targets-gl-sdf)
 
 $(dv-targets-rtl): SIM=ELF
 $(dv-targets-elf): verify-%-elf: $(dv_base_dependencies)
-	echo I WAS RUN
 	$(docker_run_build)
 
 $(dv-targets-rtl): SIM=RTL
