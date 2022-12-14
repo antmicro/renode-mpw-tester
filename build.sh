@@ -182,7 +182,6 @@ case "${1:-ALL}" in
     test_nodocker)
         shift
         build_test_nodocker $*
-        break
         ;;
     *) usage ;;
 esac
