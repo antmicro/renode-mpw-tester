@@ -23,7 +23,7 @@ INCLUDE=${INCLUDE:-${INCLUDE_DEFAULT}}
 
 build_test_nodocker()
 {
-    echo "\n\n\n build_test_nodocker \n\n\n"
+    echo -e "\n\n\n build_test_nodocker \n\n\n"
 
     export TARGET_PATH=$(pwd)
     export TOOLS="$BASE_DIR"/riscv-unknown-elf-gcc
@@ -61,7 +61,7 @@ usage()
 
 build_soc_configuration()
 {
-    echo "\n\n\n build_soc_configuration \n\n\n"
+    echo -e "\n\n\n build_soc_configuration \n\n\n"
     pushd "$BASE_DIR"/design/mgmt_core_wrapper/litex >/dev/null
     pip install -r requirements.txt
     make mgmt_soc
@@ -71,7 +71,7 @@ build_soc_configuration()
 
 build_renode_configuration()
 {
-    echo "\n\n\n build_renode_configuration \n\n\n"
+    echo -e "\n\n\n build_renode_configuration \n\n\n"
     python3 "$BASE_DIR"/scripts/litex_json2renode.py --auto-align dff --auto-align sram --repl design.repl "$BASE_DIR"/artifacts/csr.json
     cat design.repl scripts/design-addend.repl > "$BASE_DIR"/artifacts/design.repl
     cp scripts/design.resc "$BASE_DIR"/artifacts
@@ -80,7 +80,7 @@ build_renode_configuration()
 
 build_test()
 {
-    echo "\n\n\n build_test \n\n\n"
+    echo -e "\n\n\n build_test \n\n\n"
     pushd "$BASE_DIR"/design >/dev/null
     make -f "${BASE_DIR}"/design.Makefile verify-"$TEST_NAME"-elf
     cp "$BASE_DIR"/design/verilog/dv/"$TEST_NAME"/"$TEST_NAME".elf "$BASE_DIR"/artifacts/test.elf
@@ -89,7 +89,7 @@ build_test()
 
 verilate_design()
 {
-    echo "\n\n\n verilate_design \n\n\n"
+    echo -e "\n\n\n verilate_design \n\n\n"
     echo "DESIGN NAME:     $DESIGN_NAME"
 
     pushd "$BASE_DIR/$VERILATOR_DIR" >/dev/null
