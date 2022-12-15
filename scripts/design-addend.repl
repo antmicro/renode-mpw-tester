@@ -6,3 +6,11 @@ hk: @ none
 user_space: Verilated.BaseDoubleWordVerilatedPeripheral @ sysbus <0x30000000, +0x1000>
     frequency: 100000000
     UseAbsoluteAddress: true
+
+mprj_data: Python.PythonPeripheral @ sysbus 0x2600000C
+    size: 0x4
+    initable: false
+    script: '''
+if request.isWrite and request.value == 0xAB610000:
+    self.DebugLog('Test passed!')
+'''
