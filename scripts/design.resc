@@ -4,7 +4,5 @@ machine LoadPlatformDescription $ORIGIN/../artifacts/design.repl
 showAnalyzer uart
 showAnalyzer uart Antmicro.Renode.Analyzers.LoggingUartAnalyzer
 
-cpu EnableProfiler true $ORIGIN/../artifacts/execution-trace.speedscope true
-
 sysbus LoadELF $ORIGIN/../artifacts/test.elf
 user_space SimulationFilePath $ORIGIN/../artifacts/libVtop.so
