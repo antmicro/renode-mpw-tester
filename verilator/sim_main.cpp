@@ -54,6 +54,8 @@ RenodeAgent *Init() {
     bus->wb_addr = (uint64_t *)&top->io_wbs_adr_i;
     bus->wb_rd_dat = (uint64_t *)&top->io_wbs_dat_o;
     bus->wb_wr_dat = (uint64_t *)&top->io_wbs_dat_i;
+    bus->granularity = 1;
+    bus->addr_lines = 32;
 
     //=================================================
     // Init eval function
