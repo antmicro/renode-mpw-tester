@@ -16,8 +16,9 @@ Create Machine
 *** Test Cases ***
 Should Pass Validator Test
 
-    Create Machine
     Create Log Tester         5000
+    Create Machine
+    Execute Command    logLevel 0
     Start Emulation
 
     Wait For Log Entry        Test passed!

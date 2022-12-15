@@ -3,6 +3,7 @@ mach create
 machine LoadPlatformDescription $ORIGIN/../artifacts/design.repl
 showAnalyzer uart
 showAnalyzer uart Antmicro.Renode.Analyzers.LoggingUartAnalyzer
+logLevel 0
 
 sysbus LoadELF $ORIGIN/../artifacts/test.elf
 user_space SimulationFilePath $ORIGIN/../artifacts/libVtop.so
