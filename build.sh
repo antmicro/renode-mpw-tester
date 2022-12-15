@@ -4,8 +4,8 @@ set -e
 
 export BASE_DIR=${BASE_DIR:-${GITGUB_WORKSPACE}}
 export BASE_DIR=${BASE_DIR:-$(pwd)}
-PDK_ROOT_DEFAULT=/usr/local/share/pdk
-export PDK_ROOT=${PDK_ROOT:-${PDK_ROOT_DEFAULT}}
+#PDK_ROOT_DEFAULT=/usr/local/share/pdk
+#export PDK_ROOT=${PDK_ROOT:-${PDK_ROOT_DEFAULT}}
 VERILATOR_DIR=${VERILATOR_DIR:-verilator}
 RENODE_CLONE_DIR=${RENODE_CLONE_DIR:-renode}
 BUILD_DIR=${BUILD_DIR:-build}
@@ -103,7 +103,7 @@ verilate_design()
         git pull --depth=1
         popd >/dev/null
     } \
-    || git clone --depth=1 --branch 37446-mpw_testing https://github.com/renode/renode
+    || git clone --depth=1 https://github.com/renode/renode
 
     pushd "$BASE_DIR/$VERILATOR_DIR/$RENODE_CLONE_DIR" >/dev/null
     git submodule update --init src/Infrastructure

@@ -48,7 +48,7 @@ jobs:
       - name: Run test
         uses: antmicro/renode-test-action@v3.0.0
         with:
-          renode-version: '1.13.1+20220918git57f09419'
+          renode-version: 'latest'
           tests-to-run: 'artifacts/*.robot'
           artifacts-path: $GITHUB_WORKSPACE/artifacts
 
