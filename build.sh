@@ -47,7 +47,7 @@ usage()
     echo " -f MAIN_FILE     - Set specific verilator file to use"
     echo " -i EXTRA_FILE    - Copy additional file to $VERILATOR_DIR"
     echo " -I INCLUDE       - Set include in sim_main.cpp, default is $INCLUDE_DEFAULT"
-    echo " -C CLASS         - Set top class in sim_main.cpp, default is $CLASS_NAME_DEFAULT"
+    echo " -c CLASS         - Set top class in sim_main.cpp, default is $CLASS_NAME_DEFAULT"
     echo " -V               - Display all possible design names"
     echo " -T               - Display all possible test names"
     echo " -p               - Set PDK root directory, default is $PDK_ROOT_DEFAULT"
