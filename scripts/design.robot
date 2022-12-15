@@ -20,7 +20,7 @@ Should Pass Validator Test
     Create Log Tester         5000
     Start Emulation
 
-    Wait For Log Entry        WriteDoubleWord to non existing peripheral at ${ADDRESS}, value ${VALUE}
+    Wait For Log Entry        Test passed!
 
 
 
